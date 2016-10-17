@@ -80,6 +80,11 @@ int main(void)
 	/* Set the font */
 	/* write "hello world" on display */
 	
+	glcd_tiny_set_font(Font5x7, 5, 7, GLCD_LCD_HEIGHT, GLCD_LCD_WIDTH);
+	glcd_clear_buffer();
+	glcd_tiny_draw_string(0, 0, "!!Hello World!!");
+	glcd_write();
+	
 	while(1) {
     /* If 100ms has been elapsed */
     if (TimeDisplay == 1)
