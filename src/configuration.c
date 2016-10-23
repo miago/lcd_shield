@@ -36,6 +36,8 @@ void RCC_configuration(void)
 
 	
 	//$TASK ADC
+	// for POT1, attached on A0 -> PA0 on NUCLEO-F103RB -> ADC12_IN0
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 	
 	
 	//$TASK I2C
@@ -79,7 +81,11 @@ void GPIO_configuration(void)
 	
 	
 	//$TASK ADC
-
+	/* set pin PA0 as an analog input */
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
 	//$TASK I2C
 
@@ -87,9 +93,18 @@ void GPIO_configuration(void)
 
 void ADC_configuration(void)
 {
-	// ADC_InitTypeDef  ADC_InitStructure;
 	
 	//$TASK ADC
+	ADC_InitTypeDef  ADC_InitStructure;
+	
+	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+  ADC_InitStructure.ADC_ScanConvMode = DISABLE;  
+  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None; 
+  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+  ADC_InitStructure.ADC_NbrOfChannel = 1;
+	
+	ADC_Init(ADC1, &ADC_InitStructure);
  
 }
 
