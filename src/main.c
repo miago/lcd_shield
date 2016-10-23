@@ -91,7 +91,7 @@ int main(void)
     {
 			//$TASK ADC
 			/* set contrast of display with ADC value from potentiometer 1 */
-
+			
 			
 			//$TASK Accelerometer
 			/* get acceleration data */
