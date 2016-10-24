@@ -85,6 +85,17 @@ int main(void)
 	glcd_tiny_draw_string(0, 0, "!!Hello World!!");
 	glcd_write();
 	
+	
+	/* cycle contrast: from 0 (brightest) to 63 (darkest)
+	delay_ms(1000);
+	
+	for(uint8_t contr = 0; contr <= 63; contr++){
+		glcd_set_contrast(contr);
+		delay_ms(100);
+	}
+	
+	glcd_set_contrast(30);
+	
 	while(1) {
     /* If 100ms has been elapsed */
     if (TimeDisplay == 1)
@@ -96,7 +107,7 @@ int main(void)
 			//$TASK Accelerometer
 			/* get acceleration data */
 			
-      Display(RTC_GetCounter(),readTemperatur(), ax, ay, az);
+      Display(RTC_GetCounter(),readTemperature(), ax, ay, az);
       TimeDisplay = 0;
     }
 	}

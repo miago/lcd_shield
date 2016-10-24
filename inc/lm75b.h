@@ -18,7 +18,7 @@
 
 /* Private defines------------------------------------------------------------*/
 /* Prototypes ------------------------------------------------------------------*/
-float readTemperatur(void);
+float readTemperature(void);
 
 #endif /*__LM75B_H */
 

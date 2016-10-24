@@ -34,11 +34,11 @@
 /* Private functions ---------------------------------------------------------*/
 
 /**
-  * @brief  Reads the temperatur from LM75B over I2C
+  * @brief  Reads the temperature from LM75B over I2C
   * @param  None
-  * @retval Temperatur
+  * @retval Temperature
   */
-float readTemperatur(void)
+float readTemperature(void)
 {
 	int16_t tmp;
 	
