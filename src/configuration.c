@@ -37,6 +37,7 @@ void RCC_configuration(void)
 	
 	//$TASK ADC
 	// for POT1, attached on A0 -> PA0 on NUCLEO-F103RB -> ADC12_IN0
+	// APRB2: Peripheral Bus 2
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 	
 	
@@ -82,7 +83,7 @@ void GPIO_configuration(void)
 	
 	//$TASK ADC
 	/* set pin PA0 as an analog input */
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -93,9 +94,13 @@ void GPIO_configuration(void)
 
 void ADC_configuration(void)
 {
-	
-	//$TASK ADC
 	ADC_InitTypeDef  ADC_InitStructure;
+	//$TASK ADC
+	
+	// divide clock: 72/6 = 12 MHz
+	RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+	
+	ADC_DeInit(ADC1);
 	
 	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
   ADC_InitStructure.ADC_ScanConvMode = DISABLE;  
@@ -106,6 +111,18 @@ void ADC_configuration(void)
 	
 	ADC_Init(ADC1, &ADC_InitStructure);
  
+	ADC_Cmd(ADC1, ENABLE);
+	
+	/* CALIBRATION OF ADC */
+	ADC_ResetCalibration(ADC1);
+	while(ADC_GetResetCalibrationStatus(ADC1));
+	ADC_StartCalibration(ADC1);
+	while(ADC_GetCalibrationStatus(ADC1));
+	
+	
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1,  ADC_SampleTime_239Cycles5);
+	
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
 void SPI_configuration(void)

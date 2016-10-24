@@ -48,6 +48,11 @@ int main(void)
 {
 	float ax, ay, az;
 	
+	char contrast_text[5];
+	uint16_t pot_1_value_raw;
+	float pot_1_value_normalized;
+	uint8_t contrast;
+	
   /* SysTick end of count event each 1ms */
   RCC_GetClocksFreq(&RCC_Clocks);
   SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
@@ -86,27 +91,41 @@ int main(void)
 	glcd_write();
 	
 	
-	/* cycle contrast: from 0 (brightest) to 63 (darkest)
+	/* cycle contrast: from 0 (brightest) to 63 (darkest) */
+	
+	/*
 	delay_ms(1000);
 	
 	for(uint8_t contr = 0; contr <= 63; contr++){
 		glcd_set_contrast(contr);
+		sprintf(contrast_text, "%4d", contr);
+		glcd_tiny_set_font(Font5x7, 5, 7, GLCD_LCD_HEIGHT, GLCD_LCD_WIDTH);
+		glcd_clear_buffer();
+		glcd_tiny_draw_string(0, 0, contrast_text);
+		glcd_write();
 		delay_ms(100);
 	}
 	
 	glcd_set_contrast(30);
+	*/
+	
 	
 	while(1) {
+		
+		//$TASK ADC
+		/* set contrast of display with ADC value from potentiometer 1 */
+		pot_1_value_raw = ADC_GetConversionValue(ADC1);
+		// normalize to be between 0 and 63
+		pot_1_value_normalized = ((float)pot_1_value_raw) * 63.0 / 4095;
+		contrast = (uint8_t) pot_1_value_normalized;
+		glcd_set_contrast(contrast);
+		//$TASK Accelerometer
+
+		
     /* If 100ms has been elapsed */
     if (TimeDisplay == 1)
     {
-			//$TASK ADC
-			/* set contrast of display with ADC value from potentiometer 1 */
-			
-			
-			//$TASK Accelerometer
 			/* get acceleration data */
-			
       Display(RTC_GetCounter(),readTemperature(), ax, ay, az);
       TimeDisplay = 0;
     }
