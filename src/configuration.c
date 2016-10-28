@@ -27,6 +27,12 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
+
+/**
+  * @brief  Configure the Clocks
+  * @param  None
+  * @retval None
+  */
 void RCC_configuration(void)
 {
 	//$TASK SPI
@@ -49,6 +55,11 @@ void RCC_configuration(void)
 
 }
 
+/**
+  * @brief  Configure the used GPIOs
+  * @param  None
+  * @retval None
+  */
 void GPIO_configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -103,6 +114,11 @@ void GPIO_configuration(void)
 	
 }
 
+/**
+  * @brief  Configure the ADC, used to read the potentiometers
+  * @param  None
+  * @retval None
+  */
 void ADC_configuration(void)
 {
 	ADC_InitTypeDef  ADC_InitStructure;
@@ -136,6 +152,11 @@ void ADC_configuration(void)
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
+/**
+  * @brief  Configure the SPI interface, used to comunicate with the LCD.
+  * @param  None
+  * @retval None
+  */
 void SPI_configuration(void)
 {
 	SPI_InitTypeDef SPI_InitStructure;
@@ -156,29 +177,42 @@ void SPI_configuration(void)
 	SPI_Cmd(SPI1, ENABLE);
 }
 
+/**
+  * @brief  I2C configuration, used to communicate with the accelerometer
+  * @param  None
+  * @retval None
+  */
 void I2C_configuration(void)
 {
-	I2C_InitTypeDef I2C_InitStructure;
+	
+	//I2C_InitTypeDef I2C_InitStructure;
+	
+	
 	
 	//$TASK I2C
-	I2C_InitStructure.I2C_ClockSpeed = 400;          /*!< Specifies the clock frequency.
+	//I2C_InitStructure.I2C_ClockSpeed = 400;          
+	/*!< Specifies the clock frequency.
                                          This parameter must be set to a value lower than 400kHz */
 
-  I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;                /*!< Specifies the I2C mode.
+  //I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;                
+	/*!< Specifies the I2C mode.
                                          This parameter can be a value of @ref I2C_mode */
 
-  I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;           /*!< Specifies the I2C fast mode duty cycle.
+  //I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;           
+	/*!< Specifies the I2C fast mode duty cycle.
                                          This parameter can be a value of @ref I2C_duty_cycle_in_fast_mode */
 
-  I2C_InitStructure.I2C_OwnAddress1 = 0x3c;         /*!< Specifies the first device own address.
+  //I2C_InitStructure.I2C_OwnAddress1 = 0x3c;         
+	/*!< Specifies the first device own address.
                                          This parameter can be a 7-bit or 10-bit address. */
 
-  I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;                 /*!< Enables or disables the acknowledgement.
+  //I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;                 
+	/*!< Enables or disables the acknowledgement.
                                          This parameter can be a value of @ref I2C_acknowledgement */
 
-	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; /*!< Specifies if 7-bit or 10-bit address is acknowledged.
+	//I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; 
+	/*!< Specifies if 7-bit or 10-bit address is acknowledged.
                                          This parameter can be a value of @ref I2C_acknowledged_address */
-
 }
 
 void RTC_configuration(void)

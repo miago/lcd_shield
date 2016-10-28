@@ -27,17 +27,42 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
-/* System */
+/**
+* @brief Counter for the delay function
+ */
 static __IO uint32_t uwTimingDelay;
+
+/**
+* @brief Millisecond system counter, managed by SysTick_Handler 
+*/
 extern uint32_t ms_ticks;
+
+/**
+* @brief Configuration variable for the system clock
+*/
 RCC_ClocksTypeDef RCC_Clocks;
 
-/* RTC 1/10 Second */
+/**
+* @brief RTC 1/10 Second
+*/
 __IO uint32_t TimeDisplay = 0;
 
 
 /* Private function prototypes -----------------------------------------------*/
+uint8_t getContrast(uint16_t raw_value);
 /* Private functions ---------------------------------------------------------*/
+
+/**
+  * @brief  Scales the value of the potentiometer linearly between 0 and 63, such that
+	it can be used to set the constrast of the LCD.
+  * @param  raw_value Raw value of the potentiometer, bounded between 0 and 4095
+  * @retval ocnstrast Contrast value scaled between 0 and 63
+  */
+uint8_t getContrast(uint16_t raw_value){
+	uint8_t contrast;
+	contrast = (uint8_t)(((float)raw_value) * 63.0 / 4095);
+	return contrast;
+}
 
 /**
   * @brief  Main program
@@ -48,9 +73,8 @@ int main(void)
 {
 	float ax, ay, az;
 	
-	char contrast_text[5];
+	//char contrast_text[5];
 	uint16_t pot_1_value_raw;
-	float pot_1_value_normalized;
 	uint8_t contrast;
 	
   /* SysTick end of count event each 1ms */
@@ -87,7 +111,7 @@ int main(void)
 	
 	glcd_tiny_set_font(Font5x7, 5, 7, GLCD_LCD_HEIGHT, GLCD_LCD_WIDTH);
 	glcd_clear_buffer();
-	glcd_tiny_draw_string(0, 0, "!!Hello World!!");
+	glcd_tiny_draw_string(0, 0, "SPI & LCD Working!");
 	glcd_write();
 	
 	
@@ -116,8 +140,8 @@ int main(void)
 		/* set contrast of display with ADC value from potentiometer 1 */
 		pot_1_value_raw = ADC_GetConversionValue(ADC1);
 		// normalize to be between 0 and 63
-		pot_1_value_normalized = ((float)pot_1_value_raw) * 63.0 / 4095;
-		contrast = (uint8_t) pot_1_value_normalized;
+		
+		contrast = getContrast(pot_1_value_raw);
 		glcd_set_contrast(contrast);
 		//$TASK Accelerometer
 
