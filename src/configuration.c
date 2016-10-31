@@ -185,34 +185,37 @@ void SPI_configuration(void)
 void I2C_configuration(void)
 {
 	
-	//I2C_InitTypeDef I2C_InitStructure;
+	I2C_InitTypeDef I2C_InitStructure;
 	
 	
 	
 	//$TASK I2C
-	//I2C_InitStructure.I2C_ClockSpeed = 400;          
+	I2C_InitStructure.I2C_ClockSpeed = 400000;          
 	/*!< Specifies the clock frequency.
                                          This parameter must be set to a value lower than 400kHz */
 
-  //I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;                
+  I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;                
 	/*!< Specifies the I2C mode.
                                          This parameter can be a value of @ref I2C_mode */
 
-  //I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;           
+  I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;           
 	/*!< Specifies the I2C fast mode duty cycle.
                                          This parameter can be a value of @ref I2C_duty_cycle_in_fast_mode */
 
-  //I2C_InitStructure.I2C_OwnAddress1 = 0x3c;         
+  I2C_InitStructure.I2C_OwnAddress1 = 0x3c;         
 	/*!< Specifies the first device own address.
                                          This parameter can be a 7-bit or 10-bit address. */
 
-  //I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;                 
+  I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;                 
 	/*!< Enables or disables the acknowledgement.
                                          This parameter can be a value of @ref I2C_acknowledgement */
 
-	//I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; 
+	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; 
 	/*!< Specifies if 7-bit or 10-bit address is acknowledged.
                                          This parameter can be a value of @ref I2C_acknowledged_address */
+	I2C_Init(I2C1, &I2C_InitStructure);
+	
+	I2C_Cmd(I2C1, ENABLE);
 }
 
 void RTC_configuration(void)
