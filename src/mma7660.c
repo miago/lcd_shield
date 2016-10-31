@@ -23,30 +23,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 //$TASK MMA7669
-#define MMA7660_ADDR 0x00
-#define MMA7660_SENSITIVITY 0
 
-#define MMA7660_X 0x00
-#define MMA7660_Y 0x00
-#define MMA7660_Z 0x00
-#define MMA7660_TILT 0x00
-#define MMA7660_SRST 0x00
-#define MMA7660_SPCNT 0x00
-#define MMA7660_INTSU 0x00
-#define MMA7660_MODE 0x00
-#define MMA7660_STAND_BY 0x00
-#define MMA7660_ACTIVE 0x00
-#define MMA7660_SR 0x00 //sample rate register
-#define AUTO_SLEEP_120 0x00//120 sample per second
-#define AUTO_SLEEP_64 0x00
-#define AUTO_SLEEP_32 0x00
-#define AUTO_SLEEP_16 0x00
-#define AUTO_SLEEP_8 0x00
-#define AUTO_SLEEP_4 0x00
-#define AUTO_SLEEP_2 0x00
-#define AUTO_SLEEP_1 0x00
-#define MMA7660_PDET 0x00
-#define MMA7660_PD 0x00
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -73,7 +50,26 @@ void MMA7660setMode(uint8_t mode)
 {
 	//$TASK MMA7660
 	/*set mode by writing MMA7660_MODE and mode over I2C*/
-
+	uint8_t data_to_send[2];
+	
+	/*
+	B7   B6   B5   B4   B3   B2   B1   B0
+	IAH  IPP  SCPS ASE  AWE  TON  -    MODE
+	
+	
+	MODE: 0: standby      1: active
+	TON: Test sfuff  0: as defined by mode, 1: test mode
+	AWE: Autowakeup, 0: disabled, 1: enabled
+	ASE: Autosleep,  0: disabled, 1: enabled
+	SCPS: Prescaler  0: divide by 1, 1: divide by 16
+	IPP: interrupt   0: Open Drain 1: Push-Pull
+	IAH: 0: interrupt is active low, 1: interrupt is active high
+	*/
+	
+	data_to_send[0] = MMA7660_MODE;
+	data_to_send[1] = mode;
+		
+	I2C_Write_n_byte(I2C1, MMA7660_ADDR, 2, data_to_send);
 }
 
 /**
@@ -85,7 +81,8 @@ void MMA7660setSampleRate(uint8_t rate)
 {
 	//$TASK MMA7660
 	/*set sample rate by writing MMA7660_SR and rate over I2C*/
-
+	
+	I2C_Write_2_byte(I2C1, MMA7660_ADDR, MMA7660_SR, rate);
 }
 
 /**
@@ -95,10 +92,18 @@ void MMA7660setSampleRate(uint8_t rate)
   */
 void MMA7660getAcceleration(float *x, float *y, float *z)
 {
-	// u8 buffer[3] = {64, 64, 64};
+	uint8_t buffer[3] = {64, 64, 64};
 
 	//$TASK MMA7660
 	/* while alert bit is set: read all 3 data byte */
+	
+	while ( buffer[0] > 63 | buffer[1] > 63 | buffer[2] > 63) {
+		I2C_Write_1_Read_n_byte(I2C1, MMA7660_ADDR, MMA7660_X, 3, buffer);
+	}
+	
+	*x = (((int8_t)(buffer[0]<<2))/4)/MMA7660_SENSITIVITY;
+	*y = (((int8_t)(buffer[1]<<2))/4)/MMA7660_SENSITIVITY;
+	*z = (((int8_t)(buffer[2]<<2))/4)/MMA7660_SENSITIVITY;
 
 	/* calculate accelerations */
 

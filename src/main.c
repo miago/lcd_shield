@@ -82,7 +82,7 @@ int main(void)
 	uint16_t tempRaw;
 	float temp;
 	
-	char text1[10];
+	char text1[25];
 	
 	//char contrast_text[5];
 	uint16_t pot_1_value_raw;
@@ -106,7 +106,7 @@ int main(void)
 //_$todo	while(1); 
 	
 	//$TASK glcd
-	glcd_select_screen((uint8_t *)&glcd_buffer,&glcd_bbox);
+	glcd_select_screen((uint8_t *)&glcd_buffer, &glcd_bbox);
 	glcd_reset();
 	glcd_ST7565R_init();
 	
@@ -156,6 +156,15 @@ int main(void)
 		glcd_set_contrast(contrast);
 		//$TASK Accelerometer
 		
+		MMA7660getAcceleration(&ax, &ay, &az);
+		sprintf(text1, "x: %4.2f", ax);
+		glcd_draw_string_xy(0, ROW2, text1);
+		sprintf(text1, "y: %4.2f", ay);
+		glcd_draw_string_xy(0, ROW3, text1);
+		sprintf(text1, "z: %4.2f", az);
+		glcd_draw_string_xy(0, ROW4, text1);
+		
+		
 		// temperature
 		
 		tempRaw = I2C_Write_1_Read_2_byte(I2C1, LM75B_ADDR, LM75B_TEMP) >> 5;
@@ -169,7 +178,7 @@ int main(void)
 		
 		sprintf(text1, "%3.1f", temp);
 		
-		glcd_draw_string_xy(DATACOL, ROW2, text1);
+		glcd_draw_string_xy(60, ROW2, text1);
 		
 		// put it on the display
 		glcd_write();
