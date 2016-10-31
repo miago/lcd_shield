@@ -52,6 +52,7 @@ void RCC_configuration(void)
 	// SCL connected to PB9
 	// GPIO B is already clocked
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
 
 }
 
@@ -105,13 +106,12 @@ void GPIO_configuration(void)
 	
 	//$TASK I2C
 	// SCL (PB8)and SDA (PB9) are altrenate functions, remapped
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	
 	GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
 	
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
 /**
