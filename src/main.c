@@ -47,6 +47,12 @@ RCC_ClocksTypeDef RCC_Clocks;
 */
 __IO uint32_t TimeDisplay = 0;
 
+// defines for the displays
+#define DATACOL 0
+#define ROW1 0
+#define ROW2 8
+#define ROW3 16
+#define ROW4 24
 
 /* Private function prototypes -----------------------------------------------*/
 uint8_t getContrast(uint16_t raw_value);
@@ -72,6 +78,11 @@ uint8_t getContrast(uint16_t raw_value){
 int main(void)
 {
 	float ax, ay, az;
+	
+	uint16_t tempRaw;
+	float temp;
+	
+	char text1[10];
 	
 	//char contrast_text[5];
 	uint16_t pot_1_value_raw;
@@ -144,7 +155,24 @@ int main(void)
 		contrast = getContrast(pot_1_value_raw);
 		glcd_set_contrast(contrast);
 		//$TASK Accelerometer
+		
+		// temperature
+		
+		tempRaw = I2C_Write_1_Read_2_byte(I2C1, LM75B_ADDR, LM75B_TEMP) >> 5;
+		
+		if (tempRaw & (1<<10))
+		{
+			tempRaw |= 0xfc00;
+		}
 
+		temp = (float) tempRaw * 0.125;
+		
+		sprintf(text1, "%3.1f", temp);
+		
+		glcd_draw_string_xy(DATACOL, ROW2, text1);
+		
+		// put it on the display
+		glcd_write();
 		
     /* If 100ms has been elapsed */
     if (TimeDisplay == 1)
