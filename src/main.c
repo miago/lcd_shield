@@ -190,6 +190,7 @@ int main(void)
       Display(RTC_GetCounter(),readTemperature(), ax, ay, az);
       TimeDisplay = 0;
     }
+		delay_ms(100);
 	}
 }
 
