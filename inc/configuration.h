@@ -24,6 +24,8 @@ void SPI_configuration(void);
 void I2C_configuration(void);
 void RTC_configuration(void);
 void NVIC_configuration(void);
+void Beep_configuration(void);
+void Joystick_configuration(void);
 #endif /*__CONFIGURATION_H */
 
 /********** (C) COPYRIGHT BFH TI Bienne - Mechatronics Lab *****END OF FILE****/

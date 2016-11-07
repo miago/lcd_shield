@@ -25,6 +25,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
+
 /* Private variables ---------------------------------------------------------*/
 
 /**
@@ -45,7 +46,7 @@ RCC_ClocksTypeDef RCC_Clocks;
 /**
 * @brief RTC 1/10 Second
 */
-__IO uint32_t TimeDisplay = 0;
+__IO uint32_t TimeDisplay = 1;
 
 // defines for the displays
 #define DATACOL 0
@@ -54,9 +55,62 @@ __IO uint32_t TimeDisplay = 0;
 #define ROW3 16
 #define ROW4 24
 
+
 /* Private function prototypes -----------------------------------------------*/
 uint8_t getContrast(uint16_t raw_value);
+void update_joystick_state(void);
 /* Private functions ---------------------------------------------------------*/
+
+#define BTN_UP          0
+#define BTN_DOWN        1
+#define BTN_LEFT        2
+#define BTN_RIGHT       3
+#define BTN_CENTER      4
+
+/*
+                                    UP          DOWN        LEFT        RIGHT       CENTER
+*/
+
+
+GPIO_TypeDef * button_ports[5] = {   GPIOA,      GPIOB,      GPIOC,      GPIOC,      GPIOB};
+uint16_t button_pins[5] =        {      4,          0,          1,          0,          5};
+uint16_t button_ids[5] =         {  BTN_UP,     BTN_DOWN,   BTN_LEFT,   BTN_RIGHT,  BTN_CENTER};
+
+uint8_t button_state;
+uint8_t button_rising;
+uint8_t button_falling;
+
+
+/* 
+    * Level (LV) macros: 
+    * IS: boolean true if button has high state
+    * CL: clear level bit
+    * ST: set level bit
+*/
+#define LV_IS(x) ((button_state & (1<<x)) == (1<<x)) 
+#define LV_CL(x) (button_state &= ~(1<<x))
+#define LV_ST(x) (button_state |= (1<<x))
+
+/* 
+    * Rising edge (RE) macros: 
+    * IS: boolean true if button has pending rising edge bit
+    * CL: clear rising edge bit
+    * ST: set rising edge bit
+*/
+#define RE_IS(x) ((button_rising & (1<<x)) == (1<<x)) 
+#define RE_CL(x) (button_rising &= ~(1<<x))
+#define RE_ST(x) (button_rising |= (1<<x))
+
+
+/* 
+    * Falling edge (FE) macro: 
+    * IS: boolean true if button has pending falling edge bit
+    * CL: clear falling edge bit
+    * ST: set falling edge bit
+*/
+#define FE_IS(x) ((button_falling & (1<<x)) == (1<<x)) 
+#define FE_CL(x) (button_falling &= ~(1<<x))
+#define FE_ST(x) (button_falling |= (1<<x))
 
 /**
   * @brief  Scales the value of the potentiometer linearly between 0 and 63, such that
@@ -89,21 +143,25 @@ int main(void)
 	uint8_t contrast;
 	
   /* SysTick end of count event each 1ms */
-  RCC_GetClocksFreq(&RCC_Clocks);
-  SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
+    RCC_GetClocksFreq(&RCC_Clocks);
+    SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
 	
 	/* Hardware Configuration and Initialisation */
-  RCC_configuration();
+    RCC_configuration();
 	GPIO_configuration();
 	ADC_configuration();
 	SPI_configuration();
 	I2C_configuration();
 	NVIC_configuration();
+    Beep_configuration();
+    Joystick_configuration();
+    
+    TIM_Cmd(TIM2, DISABLE);
 	
 	//$TASK SPI: Turn on all dots - test whether LCD has been initialised properly
 	glcd_command(0xA5);
 
-//_$todo	while(1); 
+    //_$todo	while(1); 
 	
 	//$TASK glcd
 	glcd_select_screen((uint8_t *)&glcd_buffer, &glcd_bbox);
@@ -125,7 +183,6 @@ int main(void)
 	glcd_tiny_draw_string(0, 0, "SPI & LCD Working!");
 	glcd_write();
 	
-	
 	/* cycle contrast: from 0 (brightest) to 63 (darkest) */
 	
 	/*
@@ -144,9 +201,20 @@ int main(void)
 	glcd_set_contrast(30);
 	*/
 	
-	
 	while(1) {
-		
+        
+        update_joystick_state();
+        
+        if(RE_IS(BTN_CENTER)){
+            //TIM_Cmd(TIM2, DISABLE);
+            //RE_CL(BTN_CENTER);
+        }
+        
+        if(RE_IS(BTN_LEFT)){
+            //TIM_Cmd(TIM2, ENABLE);
+            //RE_CL(BTN_LEFT);
+        }
+        	
 		//$TASK ADC
 		/* set contrast of display with ADC value from potentiometer 1 */
 		pot_1_value_raw = ADC_GetConversionValue(ADC1);
@@ -163,8 +231,7 @@ int main(void)
 		glcd_draw_string_xy(0, ROW3, text1);
 		sprintf(text1, "z: %4.2f", az);
 		glcd_draw_string_xy(0, ROW4, text1);
-		
-		
+				
 		// temperature
 		
 		tempRaw = I2C_Write_1_Read_2_byte(I2C1, LM75B_ADDR, LM75B_TEMP) >> 5;
@@ -183,13 +250,13 @@ int main(void)
 		// put it on the display
 		glcd_write();
 		
-    /* If 100ms has been elapsed */
-    if (TimeDisplay == 1)
-    {
-			/* get acceleration data */
-      Display(RTC_GetCounter(),readTemperature(), ax, ay, az);
-      TimeDisplay = 0;
-    }
+        /* If 100ms has been elapsed */
+        if (TimeDisplay == 1)
+        {
+                /* get acceleration data */
+          //Display(RTC_GetCounter(),readTemperature(), ax, ay, az);
+          //TimeDisplay = 0;
+        }        
 		delay_ms(100);
 	}
 }
@@ -201,9 +268,9 @@ int main(void)
   */
 void delay_ms(__IO uint32_t nTime)
 { 
-  uwTimingDelay = nTime;
+    uwTimingDelay = nTime;
 
-  while(uwTimingDelay != 0);
+    while(uwTimingDelay != 0);
 }
 
 /**
@@ -213,10 +280,31 @@ void delay_ms(__IO uint32_t nTime)
   */
 void TimingDelay_Decrement(void)
 {
-  if (uwTimingDelay != 0x00)
-  { 
-    uwTimingDelay--;
-  }
+    if (uwTimingDelay != 0x00)
+    { 
+        uwTimingDelay--;
+    }
+}
+
+void update_joystick_state(void){
+    
+    for(uint16_t id = 0; id < 5; id++)
+    {
+        if((button_ports[id]->IDR & (1<<button_pins[id])) == 0x00){
+        /* Falling Edge */
+            if(LV_IS(button_ids[id])){
+            /* Button state was previously high */
+                FE_ST(button_ids[id]);
+            }
+            LV_CL(button_ids[id]);
+        } else { /* CENTER Button is high */
+            /* Rising Edge, button state was previously low */
+            if(LV_IS(button_ids[id])){
+                RE_ST(button_ids[id]);
+            }
+            LV_ST(button_ids[id]);
+        }
+    }
 }
 
 #ifdef  USE_FULL_ASSERT
@@ -230,13 +318,13 @@ void TimingDelay_Decrement(void)
   */
 void assert_failed(uint8_t* file, uint32_t line)
 { 
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+      /* User can add his own implementation to report the file name and line number,
+         ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
-  /* Infinite loop */
-  while (1)
-  {
-  }
+      /* Infinite loop */
+      while (1)
+      {
+      }
 }
 #endif
 

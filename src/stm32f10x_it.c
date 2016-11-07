@@ -138,8 +138,12 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  TimingDelay_Decrement();
-	ms_ticks++;
+    TimingDelay_Decrement();
+    ms_ticks++;
+    
+    if(ms_ticks % 100 == 0){
+        TimeDisplay = 1;
+    }
 }
 
 /**
